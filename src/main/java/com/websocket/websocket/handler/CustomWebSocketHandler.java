@@ -17,10 +17,10 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 * */
 @Slf4j
 @Component
-@RequiredArgsConstructor // 0830
+@RequiredArgsConstructor
 public class CustomWebSocketHandler extends TextWebSocketHandler {
-    private final MsgService msgService;     //0830
-    private final ObjectMapper objectMapper; //0830
+    private final MsgService msgService;
+    private final ObjectMapper objectMapper;
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
