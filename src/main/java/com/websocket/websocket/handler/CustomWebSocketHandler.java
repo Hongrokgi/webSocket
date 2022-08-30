@@ -1,5 +1,10 @@
 package com.websocket.websocket.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.websocket.websocket.dto.Message;
+import com.websocket.websocket.dto.MsgRoom;
+import com.websocket.websocket.service.MsgService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
@@ -12,16 +17,22 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 * */
 @Slf4j
 @Component
+@RequiredArgsConstructor // 0830
 public class CustomWebSocketHandler extends TextWebSocketHandler {
+    private final MsgService msgService;     //0830
+    private final ObjectMapper objectMapper; //0830
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
         log.info("payload : {}", payload);
 
-        TextMessage initialGreeting = new TextMessage("Welcome to Rokgi Chat Server ~O_O~");
-        session.sendMessage(initialGreeting);
+//        TextMessage initialGreeting = new TextMessage("Welcome to Rokgi Chat Server ~O_O~");
+//        session.sendMessage(initialGreeting);
         // 현재 Handler -> Client 에게 받은 메시지를 log 출력하고 Client 에게 환영 메시지를 리턴.
         // 클라이언트들은 서버에 접속하면 개별의 WebSocket Session 을 갖는다. 따라서 채팅방에 입장하면 클라이언트들의 WebSocket Session 정보를 채팅방에
         // 매핑해서 보관하고 있으면, 서버에 전달된 메시지를 특정 방에 매핑된 webSocket 세션 리스트에 보낼 수 있으므로 개별의 채팅방 구현이 가능하다.
+        Message msg = objectMapper.readValue(payload, Message.class);
+        MsgRoom room = msgService.findById(msg.getRoomId());
+        room.handleActions(session, msg, msgService);
     }
 }
